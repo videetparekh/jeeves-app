@@ -1,0 +1,11 @@
+# streamlit==1.31.0
+pytube==15.0.0
+deepgram-sdk==3.1.2
+matplotlib
+openai==1.11.1
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+jinja2
+fastapi-sessions

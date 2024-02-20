@@ -1,0 +1,239 @@
+.input-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding-top: 10px;
+    /* Add some padding for better appearance */
+    background-color: #fff;
+    /* Match the background color of the right block */
+}
+
+.input-container input[type="text"] {
+    width: calc(80%);
+    padding: 10px;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+}
+
+.input-container button {
+    width: 50px;
+    /* Adjust width for the button */
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #dc3545;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    outline: none;
+}
+
+.input-container button:hover {
+    background-color: #c82333;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    /* Text color */
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    justify-content: space-between;
+    /* Align blocks with space between them */
+    padding: 20px;
+    /* Adjust padding as needed */
+}
+
+.content-block {
+    flex: 1;
+    /* Each block takes equal space */
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+}
+
+h2 {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+p {
+    margin: 0;
+}
+
+.user-icon {
+    font-size: 24px;
+    color: #fff;
+    background-color: #ff5252;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+/* Add CSS for the user-info-container */
+.user-info-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+}
+
+
+.user-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.user-info {
+    text-align: center;
+}
+
+.user-name {
+    margin: 0;
+    font-weight: bold;
+}
+
+.user-percentage {
+    margin: 0;
+    color: #888;
+}
+
+
+hr {
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+}
+
+.show-content #full-text-content {
+    display: block;
+}
+
+#full-text-content {
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.hidden {
+    display: none;
+}
+
+#lineChart {
+    margin-top: 20px;
+    /* Adjust as needed */
+}
+
+.left-block {
+    width: calc(60% - 30px);
+    /* Adjust the width to accommodate the right block and space */
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    margin-right: 20px;
+}
+
+/* Add new CSS for the right block */
+.right-block {
+    width: calc(40% - 30px);
+    /* Adjust the width to accommodate the left block and space */
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    position: relative;
+    /* Positioning for the input container */
+    height: 92%;
+}
+
+.message {
+    margin-bottom: 10px;
+    clear: both;
+    overflow: auto;
+}
+
+.message-content {
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.received {
+    background-color: #c3c2c2;
+    float: left;
+    border-radius: 15px;
+    /* Add border-radius for rounded corners */
+    padding: 10px;
+    /* Add padding for better appearance */
+    margin-bottom: 10px;
+    /* Add margin to separate messages */
+    max-width: 70%;
+}
+
+.chat-container {
+    height: calc(100% - 70px);
+    /* Adjust the height to leave space for the input container */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+}
+
+.sent {
+    background-color: #4caf50;
+    color: white;
+    float: right;
+    border-radius: 15px;
+    /* Add border-radius for rounded corners */
+    padding: 10px;
+    /* Add padding for better appearance */
+    margin-bottom: 10px;
+    /* Add margin to separate messages */
+    max-width: 70%;
+}
+
+.collapsed {
+    display: none;
+}
+
+.toggle-icon {
+    cursor: pointer;
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.inactive {
+    color: #fff;
+}
+
+.active {
+    color: black;
+}
+
+.microphone-icon {
+    font-size: 14px;
+}

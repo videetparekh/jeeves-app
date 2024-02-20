@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <link rel="stylesheet" href="/static/css/report.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="content-block left-block">
+            <section id="summary">
+                <h2>Summary</h2>
+                <p id="summary-content"></p>
+            </section>
+            <hr>
+            <section id="topics">
+                <h2>Topics</h2>
+                <ul id="topics-list">
+                </ul>
+            </section>
+            <section id="relevant-reading">
+                <h2>Relevant Reading</h2>
+                <ul id="reading-list">
+                </ul>
+            </section>
+            <hr>
+            <section id="conversation-flow">
+                <h2>Conversation Flow</h2>
+                <canvas id="lineChart" width="400" height="75"></canvas>
+            </section>
+            <hr>
+            <section id="user-info">
+                <h2>User Information</h2>
+                <div id="user-info-content" class="user-info-container"></div>
+            </section>
+            <hr>
+            <section id="full-text">
+                <div class="toggle-container">
+                    <h2 onclick="toggleCollapse()">Transcript</h2>
+                    <i class="fas fa-plus toggle-icon" onclick="toggleCollapse()"></i>
+                </div>
+                <p id="transcript-content"></p>
+            </section>
+        </div>
+
+        <div class="right-block">
+            <div class="chat-container">
+                <div class="message received">
+                    <div class="message-content">Hi there! I'm Jeeves, your personal assistant. How can I help you?</div>
+                </div>
+
+            </div>
+            <div class="input-container">
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button id="submit-button">Send</button>
+                <button id="record-button"><i class="microphone-icon fas fa-microphone-alt inactive"></i></button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var analysis = JSON.parse('{{ analysis | tojson }}');
+        var participants = JSON.parse('{{ participants | tojson }}');
+        var wps = JSON.parse('{{ wps | tojson }}');
+        var wpm = JSON.parse('{{ wpm | tojson }}');
+        var oai_summary = JSON.parse('{{ oai_summary | tojson }}');
+        const queryParams = new URLSearchParams(window.location.search);
+        var file_name = queryParams.get('file_name');
+        var isRecording = false;
+        var mediaRecorder;
+        var recordedChunks = [];
+        var chart_data;
+        var y_label;
+
+        if (wps == null) {
+            chart_data = wpm;
+            y_label = "Words per Minute";
+        } else {
+            chart_data = wps;
+            y_label = "Words per Second";
+        }
+
+        $(document).ready(function () {
+            toggleCollapse();
+            // Populate summary content
+            $('#summary-content').text(oai_summary.summary);
+
+            // Populate topics list
+            var topicsList = $('#topics-list');
+            oai_summary.topics.forEach(function (topic) {
+                topicsList.append('<li>' + topic + '</li>');
+            });
+
+            // Populate relevant reading list
+            var readingList = $('#reading-list');
+            oai_summary.relevant_reading.forEach(function (article) {
+                var listItem = $('<li><a href="' + article + '">' + article + '</a></li>');
+                readingList.append(listItem);
+            });
+
+            // Populate user information
+            var userInfoContent = $('#user-info-content');
+            $.each(participants, function (pid, data) {
+                var userContainer = $('<div class="user-container"></div>');
+
+                var userIcon = $('<i class="fas fa-user-clock user-icon"></i>');
+                var userInfo = $('<div class="user-info"></div>');
+
+                var userName = $('<p class="user-name">Speaker ' + pid + '</p>');
+                var userPercentage = $('<p class="user-percentage">' + data.speaking_time.toFixed(2) + 's</p>');
+
+                userInfo.append(userName);
+                userInfo.append(userPercentage);
+
+                userContainer.append(userIcon);
+                userContainer.append(userInfo);
+
+                userInfoContent.append(userContainer);
+            });
+
+            // Populate transcript content
+            $('#transcript-content').html("<p" + analysis.join("</p><p style=\"margin-top:20px\">") + "</p>");
+
+            // Chart.js initialization
+            var ctx = $('#lineChart');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: chart_data.length }, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Data Points',
+                        data: chart_data,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointBorderColor: 'rgba(255, 255, 255, 1)',
+                        pointBorderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (s)'
+                            },
+                            ticks: {
+                                display: false
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: y_label
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0
+                        },
+                        elements: {
+                            line: {
+                                backgroundColor: 'rgba(0, 0, 0, 0)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest'
+                    }
+                }
+            });
+
+            // Handle submit button click event
+            $('#submit-button').click(function () {
+                var message = $('#message-input').val(); // Get the typed message
+                postMessageText(message); // Post the message to the chat container
+                $('#message-input').val(''); // Clear the input field
+                queryGPT(message);
+            });
+
+            // Function to post messages to the chat container
+            function postMessageText(message, isResponse) {
+                var chatContainer = $('.chat-container');
+                var messageElement = $('<div class="message"></div>');
+                var messageContent = $('<div class="message-content"></div>');
+
+                if (isResponse) {
+                    messageElement.addClass('received');
+                } else {
+                    messageElement.addClass('sent');
+                }
+
+                messageContent.text(message);
+                messageElement.append(messageContent);
+                chatContainer.append(messageElement);
+                chatContainer.scrollTop(chatContainer[0].scrollHeight);
+            }
+
+            function queryGPT(message) {
+                $.ajax({
+                    url: '/chat', // FastAPI endpoint URL
+                    type: 'POST', // HTTP method
+                    contentType: 'application/json', // Request content type
+                    data: JSON.stringify({ message: message, "file_name": file_name }), // Data to send in the request body
+                    success: function (response) {
+                        postMessageText(response["response"], true); // Post the received response to the chat container
+                    },
+                    error: function (xhr, status, error) {
+                        // Callback function to handle error response
+                        console.error('Error:', error); // Log the error to the console
+                    }
+                });
+            }
+
+
+            $('#record-button').click(function () {
+                if (!isRecording) {
+                    $('.microphone-icon').removeClass('fas fa-microphone-alt inactive');
+                    $('.microphone-icon').addClass('fa-solid fa-microphone active');
+                    startRecording();
+                } else {
+                    $('.microphone-icon').removeClass('fa-solid fa-microphone active');
+                    $('.microphone-icon').addClass('fas fa-microphone-alt inactive');
+                    stopRecording();
+                }
+                isRecording = !isRecording;
+            });
+
+            function startRecording() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function (stream) {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.ondataavailable = function (event) {
+                            if (event.data.size > 0) {
+                                recordedChunks.push(event.data);
+                            }
+                        };
+                        mediaRecorder.onstop = function () {
+                            var recordedBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                            var reader = new FileReader();
+                            reader.onload = function () {
+                                var dataUrl = reader.result;
+                                sendRecording(dataUrl);
+                            };
+                            reader.readAsDataURL(recordedBlob);
+                            recordedChunks = [];
+                        };
+                        mediaRecorder.start();
+                    })
+                    .catch(function (error) {
+                        console.error('Error accessing microphone:', error);
+                    });
+            }
+
+            function stopRecording() {
+                mediaRecorder.stop();
+            }
+
+            function sendRecording(dataUrl) {
+                $.ajax({
+                    url: '/record_chat',
+                    type: 'POST',
+                    data: JSON.stringify({ audio_data: dataUrl, "file_name": file_name }),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        postMessageText(response["user_msg"]);
+                        postMessageText(response["response"], true);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error sending recording:', error);
+                    }
+                });
+            }
+        });
+
+        function toggleCollapse() {
+            const textField = document.getElementById('transcript-content');
+            textField.classList.toggle('collapsed');
+        }
+    </script>
+</body>
+
+</html>
